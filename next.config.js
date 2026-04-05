@@ -1,19 +1,30 @@
 /** @type {import('next').NextConfig} */
 
-// GitHub Pages serves from /repo-name/ — set this to your repo name.
-// On Netlify it serves from /, so NEXT_PUBLIC_BASE_PATH is left empty.
-// Build for GitHub Pages:  NEXT_PUBLIC_BASE_PATH=/chainstreak npm run build
-// Build for Netlify:       npm run build  (no env var needed)
+/**
+ * HOW BUILDS WORK
+ * ───────────────
+ * Netlify:       npm run build         → serves from /
+ * GitHub Pages:  npm run build:github  → serves from /chainstreak/
+ *
+ * basePath is read by Next.js at BUILD time from this file.
+ * Do NOT try to pass it as a runtime env var — it won't work.
+ *
+ * If your GitHub repo is not named "chainstreak":
+ *   Change GITHUB_REPO_NAME below — that's the only place you need to edit.
+ */
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const GITHUB_REPO_NAME = "chainstreak"; // ← change if your repo name differs
+
+const isGithubPages = process.env.BUILD_TARGET === "github";
+const basePath      = isGithubPages ? `/${GITHUB_REPO_NAME}` : "";
 
 const nextConfig = {
-  output: "export",          // Static HTML export — no Node server needed
+  output: "export",       // Pure static HTML/JS — no server needed
   basePath,
   assetPrefix: basePath,
-  trailingSlash: true,       // Required for static hosting (index.html in each folder)
+  trailingSlash: true,    // Generates /page/index.html — required for static hosts
   images: {
-    unoptimized: true,       // next/image optimisation requires a server; disable for static
+    unoptimized: true,    // next/image optimisation requires a server
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false, net: false, tls: false };

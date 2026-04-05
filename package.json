@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev":             "next dev",
-    "build":           "next build",
-    "build:github":    "NEXT_PUBLIC_BASE_PATH=/chainstreak next build",
-    "start":           "npx serve out",
-    "lint":            "next lint"
+    "dev": "next dev",
+    "build": "next build",
+    "build:github": "cross-env BUILD_TARGET=github next build",
+    "start": "npx serve out",
+    "lint": "next lint"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.0",
@@ -21,6 +21,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "cross-env": "^7.0.3"
   }
 }
