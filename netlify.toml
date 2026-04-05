@@ -1,0 +1,17 @@
+# Netlify configuration for Chainstreak static export
+
+[build]
+  command   = "npm run build"
+  publish   = "out"
+
+# Serve all routes from index.html (SPA-style fallback)
+# Not strictly needed for static export with trailingSlash: true,
+# but good to have as a safety net.
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "20"
+  # No NEXT_PUBLIC_BASE_PATH on Netlify — it serves from root (/)
