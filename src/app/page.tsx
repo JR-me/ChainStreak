@@ -124,10 +124,18 @@ export default function Page() {
 
   const [showChains, setShowChains]   = useState(false);
   const [showWallets, setShowWallets] = useState(false);
+  // Locks the button label to "✓ Checked in!" for the full 3s, preventing
+  // hasCheckedInToday (set by refetchStreak) from overwriting it early.
+  const [celebrating, setCelebrating] = useState(false);
   const [mounted, setMounted]         = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { if (isConfirmed) { setTimeout(resetWrite, 3000); } }, [isConfirmed, resetWrite]);
+  useEffect(() => {
+    if (isConfirmed) {
+      setCelebrating(true);
+      setTimeout(() => { resetWrite(); setCelebrating(false); }, 3000);
+    }
+  }, [isConfirmed, resetWrite]);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -140,17 +148,40 @@ export default function Page() {
   const faucetUrl = FAUCET_URLS[chainId];
 
   const btnLabel = () => {
-    if (isTxPending)       return "Confirm in wallet…";
-    if (isConfirming)      return "Waiting for block…";
-    if (isConfirmed)       return "✓ Checked in!";
+    if (isTxPending)                return "Confirm in wallet…";
+    if (isConfirming)               return "Waiting for block…";
+    if (isConfirmed || celebrating)  return "✓ Checked in!";
     if (hasCheckedInToday) return "Come back tomorrow ↗";
     if (!isMinted)         return "✦ Mint & Check In";
     return "✦ Check In";
   };
 
-  const btnDisabled = hasCheckedInToday || isTxPending || isConfirming || isConfirmed;
+  const btnDisabled = (hasCheckedInToday && !celebrating) || isTxPending || isConfirming || isConfirmed || celebrating;
 
-  if (!mounted) return null; // Prevent SSR hydration mismatch for wagmi
+  // During SSR/static export, render a minimal shell so React can hydrate correctly.
+  // Returning null causes a hydration mismatch → all buttons stay unresponsive on Netlify/GH Pages.
+  if (!mounted) return (
+    <>
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { background: #080808; }
+        body { background: #080808; color: #bbb; font-family: 'Space Mono', monospace; min-height: 100vh; }
+      `}</style>
+      <header style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        background: "#08080890", backdropFilter: "blur(14px)",
+        borderBottom: "1px solid #141414",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 1.25rem", height: 54,
+      }}>
+        <span style={{
+          fontFamily: "'Syne',sans-serif", fontWeight: 800,
+          fontSize: 14, letterSpacing: 4, color: "#E8E8E8",
+        }}>CHAINSTREAK</span>
+      </header>
+      <main style={{ maxWidth: 700, margin: "0 auto", padding: "72px 1.25rem 4rem" }} />
+    </>
+  );
 
   return (
     <>
